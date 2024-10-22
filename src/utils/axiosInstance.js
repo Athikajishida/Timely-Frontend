@@ -1,17 +1,3 @@
-<<<<<<< HEAD
-// src/axiosInstance.js
-import axios from 'axios';
-
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:3000',
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
-});
-
-=======
 import axios from 'axios';
 
 const axiosInstance = axios.create({
@@ -43,5 +29,4 @@ axiosInstance.interceptors.response.use(
   }
 );
 
->>>>>>> cb8e1b0 (Event created)
 export default axiosInstance;
