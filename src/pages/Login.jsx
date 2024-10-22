@@ -1,7 +1,13 @@
+<<<<<<< HEAD
 // src/pages/Login.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+=======
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+>>>>>>> cb8e1b0 (Event created)
 import { loginUser } from '../store/authSlice';
 import Button from '../components/Button';
 import Input from '../components/Input';
@@ -9,14 +15,28 @@ import Input from '../components/Input';
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const dispatch = useDispatch();
+<<<<<<< HEAD
+=======
+  const navigate = useNavigate();
+  const { loading, error } = useSelector((state) => state.auth);
+>>>>>>> cb8e1b0 (Event created)
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+<<<<<<< HEAD
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(loginUser(formData));
+=======
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const result = await dispatch(loginUser(formData));
+    if (!result.error) {
+      navigate('/dashboard');
+    }
+>>>>>>> cb8e1b0 (Event created)
   };
 
   return (
@@ -38,8 +58,16 @@ const Login = () => {
             value={formData.password}
             onChange={handleChange}
           />
+<<<<<<< HEAD
           <Button type="submit" className="w-full">Log in</Button>
         </form>
+=======
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Logging in...' : 'Log in'}
+          </Button>
+        </form>
+        {error && <p className="text-red-500 text-center">{error}</p>}
+>>>>>>> cb8e1b0 (Event created)
         <div className="text-center">
           <Link to="/forgot-password" className="text-sm text-primary hover:underline">
             Forgot your password?
