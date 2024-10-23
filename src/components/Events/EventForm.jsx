@@ -12,7 +12,8 @@ const EventForm = ({ onClose }) => {
     description: '',
     type: 'one-on-one',
     emails: [],
-    location: 'google_meet',
+    platform:'1',
+    customLink: '',
     dateRange: {
       startDate: '',
       endDate: ''
@@ -330,7 +331,38 @@ const EventForm = ({ onClose }) => {
               </div>
               {errors.timeRange && <p className="text-red-500 text-sm col-span-2">{errors.timeRange}</p>}
             </div>
+            {/* New Location Section */}
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-gray-700">
+                Meeting Platform
+              </label>
+              <select
+                name="platform"
+                value={formData.platform}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500"
+              >
+                <option value="1">Google Meet</option>
+                <option value="2">Zoom</option>
+                <option value="3">Others</option>
+              </select>
 
+              {formData.platform === '3' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Custom Meeting Link
+                  </label>
+                  <input
+                    type="url"
+                    name="customLink"
+                    value={formData.customLink}
+                    onChange={handleChange}
+                    placeholder="Enter your meeting link"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500"
+                  />
+                </div>
+              )}
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Available Days

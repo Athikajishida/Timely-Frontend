@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const navItems = [
   { icon: '+', label: 'Create', href: '/create' },
-  { icon: '🔗', label: 'Event types', href: '/event-types' },
+  { icon: '🔗', label: 'Event types', href: '/dashboard' },
   { icon: '📅', label: 'Meetings', href: '/meetings' },
   { icon: '⏰', label: 'Availability', href: '/availability' },
   { icon: '👥', label: 'Contacts', href: '/contacts' },

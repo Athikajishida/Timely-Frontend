@@ -34,6 +34,8 @@ const Dashboard = () => {
         end_time: eventData.timeRange.endTime,
         buffer_time: eventData.bufferTime,
         color: eventData.color,
+        platform: eventData.platform,
+        customlink: eventData.customLink,
         days_available: eventData.daysAvailable,
         emails: eventData.emails || []
       }
