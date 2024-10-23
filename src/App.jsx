@@ -14,6 +14,7 @@ import ResetPassword from './pages/ResetPassword';
 import OTPConfirmation from './pages/OTPConfirmation';
 import Dashboard from './pages/Dashboard';
 import EventForm from './components/Events/EventForm';
+import Meetings from './pages/Meetings'
 
 const App = () => {
   const dispatch = useDispatch(); // Initialize useDispatch
@@ -38,7 +39,9 @@ const App = () => {
         <Route path="/authentication" element={<Authentication />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/EventForm" element={<EventForm />} /> 
+        <Route path="/EventForm" element={<EventForm />} />
+        <Route path="/meetings" element={<Meetings />} />
+ 
       </Routes>
     </Router>
   );

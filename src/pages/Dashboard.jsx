@@ -64,7 +64,7 @@ const Dashboard = () => {
             <div className="flex justify-between items-center mb-4">
               <div>
                 <select className="border-gray-300 rounded-md">
-                  <option>My Calendly</option>
+                  <option>My Timely</option>
                 </select>
               </div>
               <button 
@@ -88,17 +88,32 @@ const Dashboard = () => {
               />
             )}
 
-            <div className="space-y-4">
+            <div className="flex flex-wrap -mx-4">
               {events && events.length > 0 ? (
-                events.map((event) => (
-                  <EventTypeCard
-                    key={event.id}
-                    title={event.title}
-                    duration={event.duration || 'N/A'}
-                    type={event.event_type}
-                    link="#"
-                  />
-                ))
+                events.map((event) => {
+                  // Parse start_time and end_time as Date objects
+                  const startTime = new Date(event.start_time);
+                  const endTime = new Date(event.end_time);
+                  
+                  // Calculate the duration in minutes
+                  const durationInMinutes = (endTime - startTime) / (1000 * 60); // milliseconds to minutes
+                  
+                  // Format the duration (for example, 1 hr 30 min)
+                  const hours = Math.floor(durationInMinutes / 60);
+                  const minutes = durationInMinutes % 60;
+                  const duration = `${hours > 0 ? `${hours} hr ` : ''}${minutes > 0 ? `${minutes} min` : ''}` || 'N/A';
+
+                  return (
+                    <div className="w-1/3 px-4 mb-6" key={event.id}>
+                      <EventTypeCard
+                        title={event.title}
+                        duration={duration}  /* Use calculated duration here */
+                        type={event.event_type}
+                        link="#"
+                      />
+                    </div>
+                  );
+                })
               ) : (
                 <p className="text-center text-gray-500 mt-4">No events available</p>
               )}

@@ -5,6 +5,7 @@ import { addEvent } from '../../store/eventsSlice';
 
 const EventForm = ({ onClose }) => {
   const dispatch = useDispatch();
+  const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
 
   const [formData, setFormData] = useState({
     title: '',
@@ -36,29 +37,66 @@ const EventForm = ({ onClose }) => {
   const [emailInput, setEmailInput] = useState('');
   const [errors, setErrors] = useState({});
 
-  // Validate dates and times
+  const validateField = (name, value) => {
+    const newErrors = { ...errors };
+
+    // Validate title
+    if (name === 'title' && value.trim() === '') {
+      newErrors.title = 'Event title is required';
+    } else {
+      delete newErrors.title;
+    }
+
+    // Validate description
+    if (name === 'description' && value.trim() === '') {
+      newErrors.description = 'Event description is required';
+    } else {
+      delete newErrors.description;
+    }
+
+    // Validate start date
+    if (name === 'dateRange.startDate' && value < today) {
+      newErrors.startDate = 'Start date cannot be in the past';
+    } else {
+      delete newErrors.startDate;
+    }
+
+    // Validate email format
+    if (name === 'emailInput') {
+      const emailRegex = /^[^\s@]{3,}@[^\s@]{2,}\.[^\s@]{2,}$/;
+      if (!emailRegex.test(value)) {
+        newErrors.emailInput = 'Invalid email format (e.g., example@domain.com)';
+      } else {
+        delete newErrors.emailInput;
+      }
+    }
+
+    setErrors(newErrors);
+  };
+
   useEffect(() => {
-    const validateDatesAndTimes = () => {
-      const newErrors = {};
-      const { startDate, endDate } = formData.dateRange;
-      const { startTime, endTime } = formData.timeRange;
+    // Validate start/end dates and times on any changes
+    const { startDate, endDate } = formData.dateRange;
+    const { startTime, endTime } = formData.timeRange;
+    const newErrors = { ...errors };
 
-      if (startDate && endDate && startDate > endDate) {
-        newErrors.dateRange = 'End date cannot be before start date';
+    if (startDate && endDate && startDate > endDate) {
+      newErrors.dateRange = 'End date cannot be before start date';
+    } else {
+      delete newErrors.dateRange;
+    }
+
+    if (startDate === endDate && startTime && endTime) {
+      const start = new Date(`2000-01-01T${startTime}`);
+      const end = new Date(`2000-01-01T${endTime}`);
+      if (start >= end) {
+        newErrors.timeRange = 'End time must be after start time';
+      } else {
+        delete newErrors.timeRange;
       }
+    }
 
-      if (startDate === endDate && startTime && endTime) {
-        const start = new Date(`2000-01-01T${startTime}`);
-        const end = new Date(`2000-01-01T${endTime}`);
-        if (start >= end) {
-          newErrors.timeRange = 'End time must be after start time';
-        }
-      }
-
-      setErrors(newErrors);
-    };
-
-    validateDatesAndTimes();
+    setErrors(newErrors);
   }, [formData.dateRange, formData.timeRange]);
 
   const handleChange = (e) => {
@@ -66,7 +104,7 @@ const EventForm = ({ onClose }) => {
 
     if (name.startsWith('days.')) {
       const day = name.split('.')[1];
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         daysAvailable: {
           ...prev.daysAvailable,
@@ -75,35 +113,40 @@ const EventForm = ({ onClose }) => {
       }));
     } else if (name.includes('.')) {
       const [parent, child] = name.split('.');
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         [parent]: {
           ...prev[parent],
           [child]: value
         }
       }));
+      validateField(name, value);
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         [name]: value
       }));
+      validateField(name, value);
     }
   };
 
   const handleEmailAdd = () => {
-    if (emailInput && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput)) {
-      setFormData(prev => ({
+    const emailRegex = /^[^\s@]{3,}@[^\s@]{2,}\.[^\s@]{2,}$/;
+    if (emailInput && emailRegex.test(emailInput)) {
+      setFormData((prev) => ({
         ...prev,
         emails: [...prev.emails, emailInput]
       }));
       setEmailInput('');
+    } else {
+      validateField('emailInput', emailInput);
     }
   };
 
   const handleEmailRemove = (emailToRemove) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      emails: prev.emails.filter(email => email !== emailToRemove)
+      emails: prev.emails.filter((email) => email !== emailToRemove)
     }));
   };
 
@@ -130,7 +173,7 @@ const EventForm = ({ onClose }) => {
           {/* Basic Info Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Event Title
@@ -140,10 +183,12 @@ const EventForm = ({ onClose }) => {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
+                onBlur={(e) => validateField(e.target.name, e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500"
                 placeholder="e.g., Sales Call"
                 required
               />
+              {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
             </div>
 
             <div>
@@ -154,10 +199,12 @@ const EventForm = ({ onClose }) => {
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
+                onBlur={(e) => validateField(e.target.name, e.target.value)}
                 rows="3"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500"
                 placeholder="Brief description of the meeting..."
               />
+              {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
             </div>
 
             <div>
@@ -186,6 +233,7 @@ const EventForm = ({ onClose }) => {
                     type="email"
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
+                    onBlur={(e) => validateField('emailInput', e.target.value)}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500"
                     placeholder="Enter email address"
                   />
@@ -197,6 +245,7 @@ const EventForm = ({ onClose }) => {
                     Add
                   </button>
                 </div>
+                {errors.emailInput && <p className="text-red-500 text-sm">{errors.emailInput}</p>}
                 {formData.type === 'one-on-one' && formData.emails.length >= 1 && (
                   <p className="text-red-500 text-sm">Only one email allowed for one-on-one events</p>
                 )}
@@ -221,7 +270,7 @@ const EventForm = ({ onClose }) => {
           {/* Schedule Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900">Schedule</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -232,8 +281,10 @@ const EventForm = ({ onClose }) => {
                   name="dateRange.startDate"
                   value={formData.dateRange.startDate}
                   onChange={handleChange}
+                  onBlur={(e) => validateField(e.target.name, e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500"
                 />
+                {errors.startDate && <p className="text-red-500 text-sm">{errors.startDate}</p>}
               </div>
 
               <div>
@@ -248,9 +299,7 @@ const EventForm = ({ onClose }) => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500"
                 />
               </div>
-              {errors.dateRange && (
-                <p className="text-red-500 text-sm col-span-2">{errors.dateRange}</p>
-              )}
+              {errors.dateRange && <p className="text-red-500 text-sm col-span-2">{errors.dateRange}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -279,9 +328,7 @@ const EventForm = ({ onClose }) => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500"
                 />
               </div>
-              {errors.timeRange && (
-                <p className="text-red-500 text-sm col-span-2">{errors.timeRange}</p>
-              )}
+              {errors.timeRange && <p className="text-red-500 text-sm col-span-2">{errors.timeRange}</p>}
             </div>
 
             <div>

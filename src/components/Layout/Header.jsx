@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../store/authSlice'; 
 
-const Header = () => {
+const Header = ({ title, showInviteButton }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const dispatch = useDispatch();
@@ -30,11 +30,13 @@ const Header = () => {
 
   return (
     <header className="flex justify-between items-center p-4 bg-white border-b border-gray-200">
-      <h1 className="text-2xl font-bold">Event types</h1>
+      <h1 className="text-2xl font-bold">{title || 'Event Types'}</h1>
       <div className="flex items-center space-x-4">
-        <button className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-md">
-          Invite user
-        </button>
+        {showInviteButton && (
+          <button className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-md">
+            Invite user
+          </button>
+        )}
         <div className="relative" ref={dropdownRef}>
           <button 
             className="flex items-center space-x-2"
