@@ -1,3 +1,11 @@
+// @file EventForm.js
+// @description Form component for creating and managing events in the Timely application. 
+//              Fields are mapped to match the backend structure for seamless integration.
+// @version 1.0.0
+// @date 2024-10-22
+// @authors
+//  - Athika Jishida
+
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { X } from 'lucide-react';
@@ -37,6 +45,7 @@ const EventForm = ({ onClose }) => {
 
   const [emailInput, setEmailInput] = useState('');
   const [errors, setErrors] = useState({});
+  const [emailError, setEmailError] = useState('');
 
   const validateField = (name, value) => {
     const newErrors = { ...errors };
@@ -130,18 +139,25 @@ const EventForm = ({ onClose }) => {
       validateField(name, value);
     }
   };
-
+  const handleEmailInput = (e) => {
+    setEmailInput(e.target.value);
+    setEmailError(''); // Clear error when user starts typing
+  };
   const handleEmailAdd = () => {
     const emailRegex = /^[^\s@]{3,}@[^\s@]{2,}\.[^\s@]{2,}$/;
+    setEmailError('');
     if (emailInput && emailRegex.test(emailInput)) {
+      console.log('Adding email:', emailInput);
+
       setFormData((prev) => ({
         ...prev,
-        emails: [...prev.emails, emailInput]
+        emails: [...prev.emails, emailInput],
       }));
       setEmailInput('');
     } else {
       validateField('emailInput', emailInput);
     }
+
   };
 
   const handleEmailRemove = (emailToRemove) => {
@@ -233,10 +249,17 @@ const EventForm = ({ onClose }) => {
                   <input
                     type="email"
                     value={emailInput}
-                    onChange={(e) => setEmailInput(e.target.value)}
+                    onChange={handleEmailInput}
+                    // onchange={(e) => setEmailInput(e.target.value)}
                     onBlur={(e) => validateField('emailInput', e.target.value)}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500"
                     placeholder="Enter email address"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleEmailAdd();
+                      }
+                    }}
                   />
                   <button
                     type="button"
