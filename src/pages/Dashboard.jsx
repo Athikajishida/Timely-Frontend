@@ -4,11 +4,12 @@ import Sidebar from '../components/Layout/Sidebar';
 import Header from '../components/Layout/Header';
 import EventTypeCard from '../components/EventTypes/EventTypeCard';
 import EventForm from '../components/Events/EventForm';
-import { addEvent, fetchEvents } from '../store/eventsSlice';
+import { addEvent, fetchEvents, updateEvent, deleteEvent } from '../store/eventsSlice';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
   const [showForm, setShowForm] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
 
   // Fetch events from Redux store
   const events = useSelector((state) => state.events.items);
@@ -43,15 +44,69 @@ const Dashboard = () => {
     console.log('Formatted data:', formattedData);
 
     try {
-      const result = await dispatch(addEvent(formattedData)).unwrap();
-      if (result) {
-        setShowForm(false);  // Close form after successful submission
+      if (editingEvent) {
+        // Update existing event
+        const result = await dispatch(updateEvent({ id: editingEvent.id, data: formattedData })).unwrap();
+        if (result) {
+          setEditingEvent(null);
+        }
+      } else {
+        // Create new event
+        const result = await dispatch(addEvent(formattedData)).unwrap();
+        if (result) {
+          setShowForm(false);
+        }
       }
     } catch (err) {
       console.error('Failed to create event:', err);
     }
   };
 
+  const handleEditClick = (eventId) => {
+    const eventToEdit = events.find(event => event.id === eventId);
+    if (eventToEdit) {
+      // Transform the event data to match the form structure
+      const formattedEvent = {
+        title: eventToEdit.title,
+        description: eventToEdit.description,
+        type: eventToEdit.event_type,
+        location: eventToEdit.location,
+        dateRange: {
+          startDate: eventToEdit.start_date,
+          endDate: eventToEdit.end_date
+        },
+        timeRange: {
+          startTime: eventToEdit.start_time,
+          endTime: eventToEdit.end_time
+        },
+        bufferTime: eventToEdit.buffer_time,
+        color: eventToEdit.color,
+        platform: eventToEdit.platform,
+        customLink: eventToEdit.customlink,
+        daysAvailable: eventToEdit.days_available,
+        emails: eventToEdit.participant_emails
+      };
+      setEditingEvent({ id: eventId, ...formattedEvent });
+      setShowForm(true);
+    }
+  };
+
+  const handleDeleteClick = async (eventId) => {
+    if (window.confirm('Are you sure you want to delete this event?')) {
+      try {
+        await dispatch(deleteEvent(eventId)).unwrap();
+        // Refresh events list after deletion
+        dispatch(fetchEvents());
+      } catch (err) {
+        console.error('Failed to delete event:', err);
+      }
+    }
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingEvent(null);
+  };
   // Show loading state while fetching events
   if (loading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
@@ -113,6 +168,8 @@ const Dashboard = () => {
                         duration={duration}  /* Use calculated duration here */
                         type={event.event_type}
                         link="#"
+                        onEdit={() => handleEditClick(event.id)}  // Wrap in arrow function
+                        onDelete={() => handleDeleteClick(event.id)}  // Wrap in arrow function
                       />
                     </div>
                   );
