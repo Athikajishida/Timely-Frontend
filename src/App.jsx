@@ -15,6 +15,8 @@ import OTPConfirmation from './pages/OTPConfirmation';
 import Dashboard from './pages/Dashboard';
 import EventForm from './components/Events/EventForm';
 import Meetings from './pages/Meetings'
+import MyCalender from './components/Calender/MyCalender'
+import EventSchedulingView from './components/Events/EventSchedulingView'
 
 const App = () => {
   const dispatch = useDispatch(); // Initialize useDispatch
@@ -41,7 +43,9 @@ const App = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/EventForm" element={<EventForm />} />
         <Route path="/meetings" element={<Meetings />} />
- 
+        <Route path="/MyCalender" element={<MyCalender />} />
+        <Route path="/schedule/:token" element={<EventSchedulingView />} />
+
       </Routes>
     </Router>
   );

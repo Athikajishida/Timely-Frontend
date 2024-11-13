@@ -9,38 +9,69 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { X } from 'lucide-react';
-import { addEvent } from '../../store/eventsSlice';
+import { addEvent, updateEvent} from '../../store/eventsSlice';
 
-const EventForm = ({ onClose }) => {
+const EventForm = ({ onClose, onSubmit, eventData = null, mode = 'create' }) => {
   const dispatch = useDispatch();
   const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
 
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    type: 'one-on-one',
-    emails: [],
-    platform:'1',
-    customLink: '',
-    dateRange: {
-      startDate: '',
-      endDate: ''
-    },
-    timeRange: {
-      startTime: '09:00',
-      endTime: '17:00'
-    },
-    daysAvailable: {
-      monday: true,
-      tuesday: true,
-      wednesday: true,
-      thursday: true,
-      friday: true,
-      saturday: false,
-      sunday: false
-    },
-    bufferTime: '15',
-    color: '#3366FF'
+  const [formData, setFormData] = useState(() => {
+    if (eventData) {
+      return {
+        title: eventData.title || '',
+        description: eventData.description || '',
+        type: eventData.type || 'one-on-one',
+        emails: eventData.emails || [],
+        platform: eventData.platform || '1',
+        customLink: eventData.customLink || '',
+        dateRange: {
+          startDate: eventData.dateRange?.startDate || '',
+          endDate: eventData.dateRange?.endDate || ''
+        },
+        timeRange: {
+          startTime: eventData.timeRange?.startTime || '09:00',
+          endTime: eventData.timeRange?.endTime || '17:00'
+        },
+        daysAvailable: eventData.daysAvailable || {
+          monday: true,
+          tuesday: true,
+          wednesday: true,
+          thursday: true,
+          friday: true,
+          saturday: false,
+          sunday: false
+        },
+        bufferTime: eventData.bufferTime || '15',
+        color: eventData.color || '#3366FF'
+      };
+    }
+    return {
+      title: '',
+      description: '',
+      type: 'one-on-one',
+      emails: [],
+      platform: '1',
+      customLink: '',
+      dateRange: {
+        startDate: '',
+        endDate: ''
+      },
+      timeRange: {
+        startTime: '09:00',
+        endTime: '17:00'
+      },
+      daysAvailable: {
+        monday: true,
+        tuesday: true,
+        wednesday: true,
+        thursday: true,
+        friday: true,
+        saturday: false,
+        sunday: false
+      },
+      bufferTime: '15',
+      color: '#3366FF'
+    };
   });
 
   const [emailInput, setEmailInput] = useState('');
@@ -167,14 +198,66 @@ const EventForm = ({ onClose }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (Object.keys(errors).length === 0) {
-      dispatch(addEvent(formData)).then(() => {
-        onClose();
-      });
+//  const handleSubmit = (e) => {
+//   e.preventDefault();
+//   if (Object.keys(errors).length === 0) {
+//     if (mode === 'create') {
+//       dispatch(addEvent(formData)).then(onClose);
+//     } else {
+//       dispatch(updateEvent({ id: eventData.id, data: formData })).then(onClose);
+//     }
+//   }
+// };
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (Object.keys(errors).length === 0) {
+    try {
+      // Format the data to match the API structure
+      const formattedData = {
+        event: {
+          title: formData.title,
+          description: formData.description,
+          event_type: formData.type,
+          platform: formData.platform,
+          customlink: formData.customLink,
+          start_date: formData.dateRange.startDate,
+          end_date: formData.dateRange.endDate,
+          start_time: formData.timeRange.startTime,
+          end_time: formData.timeRange.endTime,
+          buffer_time: formData.bufferTime,
+          color: formData.color,
+          days_available: formData.daysAvailable,
+          participant_emails: formData.emails || []
+        }
+      };
+
+      // Check if in edit mode and if the event ID is available
+      if (mode === 'edit' && eventData?.id) {
+        // Dispatch the updateEvent action with formatted data and event ID
+        await dispatch(updateEvent({ id: eventData.id, data: formattedData })).unwrap();
+      } else {
+        // Dispatch the addEvent action with formatted data for new event creation
+        await dispatch(addEvent(formattedData)).unwrap();
+      }
+
+      // Call onSubmit if provided, passing the formatted data
+      if (onSubmit) {
+        onSubmit(formattedData);
+      }
+
+      // Close the form or modal after successful submission
+      onClose();
+      
+    } catch (error) {
+      console.error('Failed to save event:', error);
+      // Optionally set an error state to display to the user
+      setErrorMessage('An error occurred while saving the event. Please try again.');
     }
-  };
+  }
+};
+
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -421,7 +504,7 @@ const EventForm = ({ onClose }) => {
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
               disabled={Object.keys(errors).length > 0}
             >
-              Create Event
+              {mode === 'create' ? 'Create Event' : 'Update Event'}
             </button>
           </div>
         </form>

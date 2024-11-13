@@ -10,6 +10,7 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const [showForm, setShowForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   // Fetch events from Redux store
   const events = useSelector((state) => state.events.items);
@@ -67,6 +68,7 @@ const Dashboard = () => {
     if (eventToEdit) {
       // Transform the event data to match the form structure
       const formattedEvent = {
+        id: eventId,
         title: eventToEdit.title,
         description: eventToEdit.description,
         type: eventToEdit.event_type,
@@ -86,7 +88,8 @@ const Dashboard = () => {
         daysAvailable: eventToEdit.days_available,
         emails: eventToEdit.participant_emails
       };
-      setEditingEvent({ id: eventId, ...formattedEvent });
+      console.log('eventdata:',formattedEvent )
+      setEditingEvent(formattedEvent);
       setShowForm(true);
     }
   };
@@ -111,6 +114,12 @@ const Dashboard = () => {
   if (loading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
+
+  const handleCopyLink = (link) => {
+    navigator.clipboard.writeText(link);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000); // Reset the copied state after 2 seconds
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -140,7 +149,9 @@ const Dashboard = () => {
             )}
 
             {showForm && (
-              <EventForm 
+              <EventForm
+                eventData={editingEvent}
+                mode={editingEvent ? 'edit' : 'create'}
                 onClose={() => setShowForm(false)}  // Close form handler
                 onSubmit={handleEventSubmit}        // Pass submit handler
               />
@@ -167,9 +178,11 @@ const Dashboard = () => {
                         title={event.title}
                         duration={duration}  /* Use calculated duration here */
                         type={event.event_type}
-                        link="#"
+                        link={event.scheduling_link}
                         onEdit={() => handleEditClick(event.id)}  // Wrap in arrow function
                         onDelete={() => handleDeleteClick(event.id)}  // Wrap in arrow function
+                        onCopyLink={() => handleCopyLink("http://localhost:5173/schedule/"+event.scheduling_link)}
+                        isCopied={copiedLink}
                       />
                     </div>
                   );
