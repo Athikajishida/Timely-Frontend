@@ -1,10 +1,11 @@
 // src/App.jsx
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 import React, { useEffect } from 'react'; // Import useEffect
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { useDispatch } from 'react-redux'; // Import useDispatch from react-redux
 import { setUser } from './store/authSlice'; // Import setUser action from authSlice
 import { addEvent } from './store/eventsSlice';
-
+import { fetchUserBookings } from './store/bookingsSlice';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
@@ -17,7 +18,7 @@ import EventForm from './components/Events/EventForm';
 import Meetings from './pages/Meetings'
 import MyCalender from './components/Calender/MyCalender'
 import EventSchedulingView from './components/Events/EventSchedulingView'
-
+import AvailabilityCalendar from './components/Calender/AvailabilityCalendar'
 const App = () => {
   const dispatch = useDispatch(); // Initialize useDispatch
 
@@ -45,6 +46,7 @@ const App = () => {
         <Route path="/meetings" element={<Meetings />} />
         <Route path="/MyCalender" element={<MyCalender />} />
         <Route path="/schedule/:token" element={<EventSchedulingView />} />
+        <Route path="/AvailabilityCalendar" element={<AvailabilityCalendar />} />
 
       </Routes>
     </Router>
