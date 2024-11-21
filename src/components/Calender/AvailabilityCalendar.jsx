@@ -7,7 +7,8 @@ import getDay from 'date-fns/getDay';
 import enUS from 'date-fns/locale/en-US';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchEvents } from '../../store/eventsSlice';
-
+import Sidebar from '../Layout/Sidebar';
+import Header from '../Layout/Header';
 const locales = {
   'en-US': enUS
 };
@@ -35,9 +36,9 @@ const AvailabilityCalendar = () => {
   // Transform events data to match react-big-calendar format
   const transformedEvents = events.map(event => ({
     id: event.id,
-    title: event.title,
-    start: new Date(event.start_date + 'T' + event.start_time),
-    end: new Date(event.end_date + 'T' + event.end_time),
+    title: event.name || event.title, // Added fallback title
+    start: new Date(event.start_time), // Direct parsing of ISO string
+    end: new Date(event.end_time),     // Direct parsing of ISO string
     allDay: event.event_type === 'all_day',
     color: event.color || '#3174ad',
     resourceId: event.user_id

@@ -5,7 +5,7 @@ const navItems = [
   { icon: '+', label: 'Create', href: '/create' },
   { icon: '🔗', label: 'Event types', href: '/dashboard' },
   { icon: '📅', label: 'Meetings', href: '/meetings' },
-  { icon: '⏰', label: 'Availability', href: '/availability' },
+  { icon: '⏰', label: 'Availability', href: '/AvailabilityCalendar' },
   { icon: '👥', label: 'Contacts', href: '/contacts' },
   { icon: '🔄', label: 'Workflows', href: '/workflows' },
   { icon: '🔌', label: 'Integrations & apps', href: '/integrations' },

@@ -19,6 +19,10 @@ import Meetings from './pages/Meetings'
 import MyCalender from './components/Calender/MyCalender'
 import EventSchedulingView from './components/Events/EventSchedulingView'
 import AvailabilityCalendar from './components/Calender/AvailabilityCalendar'
+
+// Admin components
+import AdminDashboard from './admin/components/AdminDashboard';
+
 const App = () => {
   const dispatch = useDispatch(); // Initialize useDispatch
 
@@ -47,7 +51,7 @@ const App = () => {
         <Route path="/MyCalender" element={<MyCalender />} />
         <Route path="/schedule/:token" element={<EventSchedulingView />} />
         <Route path="/AvailabilityCalendar" element={<AvailabilityCalendar />} />
-
+        <Route path="/admin"  element={<AdminDashboard />} />
       </Routes>
     </Router>
   );

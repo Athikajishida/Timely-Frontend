@@ -21,13 +21,27 @@ const SignUp = () => {
       alert("Passwords don't match");
       return;
     }
-    const result = await dispatch(registerUser({user: { name: formData.name, email: formData.email, password: formData.password} }));
-    if (result.payload && !result.error) {
-      if (result.payload.message.includes('OTP sent')) {
-        navigate('/confirm-otp', { state: { email: formData.email } });
-      } else {
-        // Handle other success scenarios if needed
+    try {
+      const result = await dispatch(registerUser({
+        user: {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password
+        }
+      }));
+      
+      console.log('Register Result:', result);
+      
+      if (result.payload) {
+        // Navigate to OTP confirmation with email
+        navigate('/confirm-otp', { 
+          state: { 
+            email: formData.email 
+          }
+        });
       }
+    } catch (error) {
+      console.error('Registration error:', error);
     }
   };
 

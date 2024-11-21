@@ -7,8 +7,8 @@ export const registerUser = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post('/signup', userData);
-      localStorage.setItem('token', response.data.token);
-      return response.data.user;
+      // localStorage.setItem('token', response.data.token);
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response ? error.response.data : 'Network error');
     }
@@ -21,8 +21,16 @@ export const confirmOTP = createAsyncThunk(
   async ({ email, otp }, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post('/confirm_email', { email, otp });
-      localStorage.setItem('token', response.data.token);
-      return response.data;
+        // Ensure token is stored
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
+        }
+        
+        // Return the full response data including user and token
+        return {
+          token: response.data.token,
+          user: response.data.user
+        };
     } catch (error) {
       return rejectWithValue(error.response ? error.response.data : 'Network error');
     }
@@ -52,6 +60,7 @@ const authSlice = createSlice({
     loading: false,
     error: null,
     registrationSuccess: false,
+    pendingConfirmation: false, 
   },
   reducers: {
     setUser: (state, action) => {
@@ -69,6 +78,9 @@ const authSlice = createSlice({
     clearRegistrationSuccess: (state) => {
       state.registrationSuccess = false;
     },
+    clearPendingConfirmation: (state) => {
+      state.pendingConfirmation = false;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -80,7 +92,8 @@ const authSlice = createSlice({
       .addCase(registerUser.fulfilled, (state) => {
         state.loading = false;
         state.registrationSuccess = true;
-        state.error = null; // Clear error after success
+        state.pendingConfirmation = true;
+        state.error = null; 
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
@@ -95,13 +108,16 @@ const authSlice = createSlice({
       })
       .addCase(confirmOTP.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
+        state.user = action.payload.user;
         state.isAuthenticated = true;
-        state.error = null; // Clear error after success
+        state.pendingConfirmation = false;
+        state.error = null;
       })
       .addCase(confirmOTP.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        state.isAuthenticated = false;
+        localStorage.removeItem('token');
       })
 
       // Login User

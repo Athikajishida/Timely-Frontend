@@ -1,5 +1,5 @@
 // src/pages/OTPConfirmation.jsx
-import React, { useState } from 'react';
+import React, { useState , useEffect} from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { confirmOTP } from '../store/authSlice';
@@ -14,13 +14,33 @@ const OTPConfirmation = () => {
   const { loading, error } = useSelector((state) => state.auth);
   const email = location.state?.email;
 
+  useEffect(() => {
+    if (!email) {
+      navigate('/signup'); // Redirect if no email is present
+    }
+  }, [email, navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await dispatch(confirmOTP({ email, otp }));
-    if (!result.error) {
-      navigate('/dashboard'); // or wherever you want to redirect after successful confirmation
+    try {
+      const result = await dispatch(confirmOTP({ email, otp }));
+      console.log('OTP Confirmation Result:', result);
+      
+      if (!result.error) {
+        // Check if we have a token and it was stored
+        const token = localStorage.getItem('token');
+        if (token) {
+          navigate('/dashboard');
+        }
+      }
+    } catch (error) {
+      console.error('OTP confirmation error:', error);
     }
   };
+
+  if (!email) {
+    return null; // or a loading spinner
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
