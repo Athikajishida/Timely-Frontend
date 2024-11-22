@@ -18,8 +18,8 @@ axiosInstance.interceptors.request.use(
     config.headers['Access-Control-Allow-Credentials'] = 'true';
 
     // if (config.method === 'options') {
-    //   config.headers['Access-Control-Request-Method'] = 'POST, GET, DELETE, PUT, PATCH';
-    //   config.headers['Access-Control-Request-Headers'] = 'Content-Type, Authorization';
+      config.headers['Access-Control-Request-Method'] = 'POST, GET, DELETE, PUT, PATCH';
+      config.headers['Access-Control-Request-Headers'] = 'Content-Type, Authorization';
     // }
     return config;
   },
