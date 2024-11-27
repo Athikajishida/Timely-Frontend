@@ -181,7 +181,7 @@ const Dashboard = () => {
                         link={event.scheduling_link}
                         onEdit={() => handleEditClick(event.id)}  // Wrap in arrow function
                         onDelete={() => handleDeleteClick(event.id)}  // Wrap in arrow function
-                        onCopyLink={() => handleCopyLink("http://localhost:5173/schedule/"+event.scheduling_link)}
+                        onCopyLink={() => handleCopyLink("https://www.timelyapp.site/schedule/"+event.scheduling_link)}
                         isCopied={copiedLink}
                       />
                     </div>
